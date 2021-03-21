@@ -6,7 +6,11 @@
 
     <groupId>org.example</groupId>
     <artifactId>spring-cloud</artifactId>
+    <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>redis-demo</module>
+    </modules>
 
     <!-- 统一管理jar包版本 -->
     <properties>

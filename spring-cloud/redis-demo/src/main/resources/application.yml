@@ -1,0 +1,17 @@
+server:
+  port: 9001
+spring:
+  redis:
+    database: 1
+    host: 192.168.132.128
+    port: 6379
+    password: root
+    timeout: 500
+    jedis:
+      pool: # redis 连接池配置
+        max-active: 2000 # 连接池最大连接数，如果使用负数则表示没有限制
+        max-wait: -1 # 连接池最大阻塞等待时间，如果使用负数则表示没有限制
+        max-idle: 1000 # 连接池最大空闲等待数
+        min-idle: 100 # 连接池最小空闲等待数
+
+
