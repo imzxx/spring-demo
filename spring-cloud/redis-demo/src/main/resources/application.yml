@@ -3,9 +3,9 @@ server:
 spring:
   redis:
     database: 1
-    host: 192.168.132.128
+    host:
     port: 6379
-    password: root
+    password:
     timeout: 500
     jedis:
       pool: # redis 连接池配置
