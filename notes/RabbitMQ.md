@@ -597,4 +597,143 @@ public class ConsumerDemo {
 }
 ```
 
-###请求应答模型
+###RabbitMQ整合SpringBoot
+
+### 引入依赖
+
+```xml
+<!--RabbitMQ依赖-->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-amqp</artifactId>
+</dependency>
+```
+
+### 添加配置
+
+```yml
+rabbitmq:
+    host: 192.168.10.239
+    port: 5672
+    virtual-host: /msg
+    username: root
+    password: root
+```
+
+### 编写配置类
+
+```java 
+/**
+ * @ClassName RabbitMQConfig
+ * @Description TODO
+ * @Author zxx
+ * @Date 2021/3/24 2:18
+ * @Version 1.0
+ **/
+@Configuration
+public class RabbitMQConfig {
+
+    //声明交换机
+    @Bean
+    public FanoutExchange fanoutExchange(){
+        return new FanoutExchange("fanout_order_exchange",true,false);
+    }
+
+    //声明队列
+    @Bean
+    public Queue emailQueue(){
+        return new Queue("email.fanout.queue", true);
+    }
+
+    @Bean
+    public Queue smsQueue(){
+        return new Queue("sms.fanout.queue", true);
+    }
+
+    @Bean
+    public Queue wxQueue(){
+        return new Queue("wx.fanout.queue", true);
+    }
+
+    //关系绑定
+    @Bean
+    public Binding emailBinding(){
+        return BindingBuilder.bind(emailQueue()).to(fanoutExchange());
+    }
+
+    @Bean
+    public Binding smsBinding(){
+        return BindingBuilder.bind(smsQueue()).to(fanoutExchange());
+    }
+
+    @Bean
+    public Binding wxBinding(){
+        return BindingBuilder.bind(wxQueue()).to(fanoutExchange());
+    }
+
+}
+```
+
+### 消息生产者案例
+
+```java
+@Autowired
+private RabbitTemplate rabbitTemplate;
+
+/**
+         * 模拟订单发送
+         * @param userId
+         * @param productId
+         * @param num
+         */
+public void makeOrder(String userId, String productId, Integer num) {
+
+    //模拟生成订单号
+    String orderId = UUID.randomUUID().toString();
+    System.out.println("orderId:" + orderId);
+    //模拟使用MQ来发送消息
+    //参数1：exchange 交换机
+    //参数2：路由key/队列queue
+    //参数3：消息内容
+    String exchange = "fanout_order_exchange";
+    String routingKey = "";
+    rabbitTemplate.convertAndSend(exchange, routingKey, orderId);
+    System.out.println("发送完成");
+}
+```
+
+### 消息消费者案例
+
+```java 
+//监听消息队列
+@RabbitListener(queues = {"email.fanout.queue"}) 
+@Service //为了让springboot加载这个类
+public class FanoutEmailService {
+
+    @RabbitHandler
+    public void reviceMessage(String message) {
+        System.out.println("email 监听到消息-------》"+message);
+    }
+
+}
+```
+
+### 使用注解绑定队列
+
+```java
+@RabbitListener(bindings = @QueueBinding(
+        value = @Queue(value = "sms.top.queue",durable = "true",autoDelete = "false"),
+        exchange = @Exchange(value = "topic_order_exchange",type = ExchangeTypes.TOPIC),
+        key = "#.email.#"
+
+))
+@Service
+public class TopicEmailService {
+
+    @RabbitHandler
+    public void reviceMessage(String message) {
+        System.out.println("email 监听到消息-------》"+message);
+    }
+}
+```
+

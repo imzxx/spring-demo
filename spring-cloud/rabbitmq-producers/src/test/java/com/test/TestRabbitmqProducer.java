@@ -1,6 +1,7 @@
 package com.test;
 
 import com.example.rabbitmq.RabbitmqProducerApplication;
+import com.example.rabbitmq.service.OrderService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -22,8 +23,26 @@ public class TestRabbitmqProducer {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
+    @Autowired
+    private OrderService orderService;
+
     @Test
     public void test01(){
         rabbitTemplate.convertAndSend("hello","spring boot rabbitmq");
+    }
+
+    @Test
+    public void orderService(){
+        orderService.makeOrder("1","1",1);
+    }
+
+    @Test
+    public void orderDirectService(){
+        orderService.makeDirectOrder("1","1",1);
+    }
+
+    @Test
+    public void orderTopicService(){
+        orderService.makeTopicOrder("1", "1", 1);
     }
 }
