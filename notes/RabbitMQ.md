@@ -737,3 +737,229 @@ public class TopicEmailService {
 }
 ```
 
+## RabbitMQ高级
+
+### 过期时间TTL
+
+> 过期时间TTL表示可以对消息设置预期的时间，在这个时间内都可以被消费者接收获取，过来之后消息将自动删除，RabbitMQ可以对消息和队列设置TTL。
+>
+> 1. 通过队列属性设置，队列中所有消息都有相同的过期时间。
+> 2. 对消息进行单独设置，每条消息TTL可以不同。
+
+> 如果上述两种方法同时使用，则消息的过期时间以两者之间TTL较小的那个值为准。消息在队列中一旦超过设置的TTL值，就称为dead message被投递到死信队列中，消费者将无法再收到该消息。
+
+```java
+//给队列设置过期时间：
+//声明队列
+@Bean
+public Queue ttlEmailQueue(){
+    //设置过期时间
+    Map<String, Object> map = new HashMap<>();
+    map.put("x-message-ttl", 5000);
+    return new Queue("ttl.email.direct.queue", true,false,false,map);
+}
+```
+
+```java
+// 给消息设置过期时间
+MessagePostProcessor messagePostProcessor=new MessagePostProcessor() {
+    @Override
+    public Message postProcessMessage(Message message) throws AmqpException {
+        //过期时间为5秒
+        message.getMessageProperties().setExpiration("5000");
+        message.getMessageProperties().setContentEncoding("UTF-8");
+        return message;
+    }
+};
+rabbitTemplate.convertAndSend(exchange, "email", orderId,messagePostProcessor);
+```
+
+### 死信队列
+
+```java
+//创建死信队列
+@Configuration
+public class DeadRabbitMQConfig {
+
+    //声明交换机
+    @Bean
+    public DirectExchange deadExchange(){
+        return new DirectExchange("dead_order_exchange",true,false);
+    }
+
+    //声明队列
+    @Bean
+    public Queue deadQueue(){
+        return new Queue("dead.queue", true,false,false);
+    }
+
+    //关系绑定
+    @Bean
+    public Binding deadBinding(){
+        return BindingBuilder.bind(deadQueue()).to(deadExchange()).with("dead");
+    }
+}
+```
+
+```java
+//将其他队列绑定一个死信队列
+//声明队列
+@Bean
+public Queue ttlEmailQueue(){
+    //设置过期时间
+    Map<String, Object> map = new HashMap<>();
+    map.put("x-message-ttl", 5000);
+    //设置死信队列的交换机
+    map.put("x-dead-letter-exchange", "dead_order_exchange");
+    //如果有路由key，设置死信队列的路由key
+    map.put("x-dead-letter-routing-key", "dead");
+    return new Queue("ttl.email.direct.queue", true,false,false,map);
+}
+```
+
+### 分布式事务
+
+#### 可靠生产
+
+```java
+@Test
+public void test04() throws JsonProcessingException, InterruptedException {
+    Order order = new Order();
+    order.setId("2223");
+    order.setContent("新增一条订单");
+    order.setRegDate("2021-03-28");
+    ObjectMapper objectMapper = new ObjectMapper();
+  rabbitTemplate.convertAndSend("order_message","order",objectMapper.writeValueAsString(order));
+    orderMapper.insertOrder(order);
+    OrderMessage orderMessage = new OrderMessage();
+    orderMessage.setId("3333");
+    orderMessage.setContent("冗余表新增");
+    orderMessage.setStatus("0");
+    orderMessage.setRegDate("2021-03-28");
+    orderMessageMapper.insertOrder(orderMessage);
+
+    Thread.sleep(2000L);
+}
+```
+
+> 创建一条订单消息，将订单消息发送至RabbitMQ供派单系统消费。
+>
+> 为了生成者消费信息的可靠投递，使用手动ack应答模式，如果消息没有到达交换机，则重发。
+
+```java
+//PostConstruct:java提供的注解，用来修饰一个非静态的void()方法，被PostConstruct修饰的方法会在服务器加载Servlet
+//的时候运行，并且只会被服务器执行一次，PostConstruct在构造函数之后执行，init()方法之前执行
+@PostConstruct
+public void confirmCallback(){
+    //消息发送成功后，给予生产者的消息回执，来确保生产者的可靠性
+    //RabbitTemplate.ConfirmCallback用来确认消息是否到达服务器。也就是确认消息是否到达exchange中。
+    rabbitTemplate.setConfirmCallback(new RabbitTemplate.ConfirmCallback() {
+        @Override
+        public void confirm(CorrelationData correlationData, boolean ack, String cause) {
+            //如果ack为true代表消息已经收到
+            if (!ack) {
+                String orderId = correlationData.getId();
+                System.out.println("MQ队列应答失败，orderId是"+orderId);
+                OrderMessage orderMessage = new OrderMessage();
+                orderMessage.setStatus("2");
+                orderMessage.setId(orderId);
+                int count= orderMessageMapper.updateOrderStatus(orderMessage);
+                System.out.println("本地状态修改："+count);
+                return;
+            }
+        }
+    });
+}
+```
+
+> 为了可以开启手动ack，需要打开配置
+
+```yaml
+rabbitmq:
+    host: 192.168.10.239
+    port: 5672
+    virtual-host: /msg
+    username: root
+    password: root
+    listener:
+      simple:
+        acknowledge-mode: manual  #manual模式是开启手动ack
+    publisher-confirm-type: correlated #correlated值是发布消息成功到交换器后会触发回调方法
+```
+
+#### 可靠消费
+
+```yaml
+rabbitmq:
+    host: 192.168.10.239
+    port: 5672
+    virtual-host: /msg
+    username: root
+    password: root
+    # 开启消息确认
+    publisher-confirm-type: correlated
+    #开启手动ack
+    listener:
+      simple:
+        acknowledge-mode: manual
+        retry:
+          enabled: true #开启重试
+          max-attempts: 5 #最大重试次数
+          initial-interval: 2000ms #重试间隔时间
+```
+
+> 开启手动确认机制，如果消息接收异常，则重新发送。
+
+```java
+//解决消息重试的几种方案
+//1.控制重发的次数
+//2.try+catch+手动ack
+//3.try+catch+手动ack+死信队列处理
+@RabbitHandler
+public void consumerMessage(String orderMsg, Channel channel, CorrelationData correlationData, @Header(AmqpHeaders.DELIVERY_TAG) long tag) throws IOException {
+    try {
+        //获取队列中的消息
+        System.out.println("order队列收到的消息是" + orderMsg + ",count:" + count++);
+        ObjectMapper objectMapper = new ObjectMapper();
+        Order order = objectMapper.readValue(orderMsg, Order.class);
+        Distribution distribution = new Distribution();
+        distribution.setDistriId("3333");
+        distribution.setOrderId(order.getId());
+        distribution.setOrderContent(order.getContent());
+        distribution.setRegDate(order.getRegDate());
+        //int a=1/0;
+        distributionMapper.insert(distribution);
+        channel.basicAck(tag,false);
+    } catch (Exception e) {
+        System.out.println("订单保存失败");
+        //如果出现异常，根据实际情况去重发
+        //参数1：消息的tag，参数2：多条处理，参数3：是否重发
+        //false:不重发，会将消息放到死信队列，true:会一直重复发送，建议如果使用true的话，不要加try、catch否则就会造成死循环
+        channel.basicNack(tag, false, false);
+    }
+}
+```
+
+> 为了避免异常消息重复发送造成死循环，创建一个死信队列，用于监听异常消息。
+
+```java
+@Bean
+public Queue deadQueue(){
+    return new Queue("dead_order_queue", true,false,false);
+}
+
+@Bean
+public Binding deadBind(){
+    return BindingBuilder.bind(deadQueue()).to(deadOrderExchange()).with("dead.order");
+}
+
+@Bean
+public Queue orderQueue(){
+    Map<String, Object> map = new HashMap<>();
+    map.put("x-dead-letter-exchange","dead_order_message");
+    map.put("x-dead-letter-routing-key", "dead.order");
+    return new Queue("order_queue", true,false,false,map);
+}
+```
+
+> 监听到死信队列以后可以将消息回传到生产者系统中，生产者系统中进行业务数据回滚，保证数据一致性。如果死信队列出现异常，则将消息保存，进行人工干预，同时调用channel.basicNack(tag, false, false)将消息移除。

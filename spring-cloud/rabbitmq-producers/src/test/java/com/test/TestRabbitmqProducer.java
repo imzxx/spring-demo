@@ -45,4 +45,9 @@ public class TestRabbitmqProducer {
     public void orderTopicService(){
         orderService.makeTopicOrder("1", "1", 1);
     }
+
+    @Test
+    public void ttlService(){
+        orderService.makeDirectTTLOrder("1", "1", 1);
+    }
 }

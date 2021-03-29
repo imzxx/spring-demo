@@ -1,5 +1,8 @@
 package com.example.rabbitmq.service;
 
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessagePostProcessor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -68,6 +71,31 @@ public class OrderService {
         String exchange = "topic_order_exchange";
         String routingKey = "com.email.order";
         rabbitTemplate.convertAndSend(exchange, routingKey, orderId);
+        System.out.println("发送完成");
+    }
+
+
+    public void makeDirectTTLOrder(String userId, String productId, Integer num) {
+
+        //模拟生成订单号
+        String orderId = UUID.randomUUID().toString();
+        System.out.println("orderId:" + orderId);
+        //模拟使用MQ来发送消息
+        //参数1：exchange 交换机
+        //参数2：路由key/队列queue
+        //参数3：消息内容
+        String exchange = "ttl_direct_order_exchange";
+
+        // 给消息设置过期时间
+        MessagePostProcessor messagePostProcessor=new MessagePostProcessor() {
+            @Override
+            public Message postProcessMessage(Message message) throws AmqpException {
+                message.getMessageProperties().setExpiration("5000");
+                message.getMessageProperties().setContentEncoding("UTF-8");
+                return message;
+            }
+        };
+        rabbitTemplate.convertAndSend(exchange, "email", orderId,messagePostProcessor);
         System.out.println("发送完成");
     }
 

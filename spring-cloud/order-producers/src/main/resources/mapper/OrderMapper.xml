@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.order.mapper.OrderMapper">
+    <select id="findAll" resultType="com.example.order.domain.Order">
+        SELECT * FROM `order`
+    </select>
+    
+    <insert id="insertOrder" parameterType="com.example.order.domain.Order">
+        insert into `order` values (#{id},#{content},#{regDate})
+    </insert>
+</mapper>

@@ -12,6 +12,8 @@
         <module>redis-demo</module>
         <module>rabbitmq-producers</module>
         <module>rabbitmq-consumer</module>
+        <module>order-producers</module>
+        <module>distribution-consumer</module>
     </modules>
 
     <!-- 统一管理jar包版本 -->
