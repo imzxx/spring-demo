@@ -55,6 +55,7 @@ public class RedisTest {
         System.out.println(redisUtils.hashGet("customer", "name"));
         System.out.println(redisUtils.hashGet("customer", "name").equals("张三"));
         System.out.println("提交");
+        System.out.println("测试提交冲突");
     }
 
 }
