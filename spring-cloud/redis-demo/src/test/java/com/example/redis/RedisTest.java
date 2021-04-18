@@ -53,6 +53,7 @@ public class RedisTest {
             lock.unlock();
         }
         System.out.println(redisUtils.hashGet("customer", "name"));
+
         System.out.println(redisUtils.hashGet("customer", "name").equals("张三"));
     }
 
