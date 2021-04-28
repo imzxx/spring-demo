@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="order-producers" />
+        <module name="redis-demo" />
+        <module name="cloud-provider-payment8001" />
+        <module name="cloud-sentinel-service8401" />
+        <module name="rabbitmq-consumer" />
+        <module name="rabbitmq-producers" />
+        <module name="distribution-consumer" />
+        <module name="cloud-provider-payment9001" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="cloud-provider-payment8001" target="1.8" />
+      <module name="cloud-provider-payment9001" target="1.8" />
+      <module name="cloud-sentinel-service8401" target="1.8" />
+      <module name="distribution-consumer" target="1.8" />
+      <module name="order-producers" target="1.8" />
+      <module name="rabbitmq-consumer" target="1.8" />
+      <module name="rabbitmq-producers" target="1.8" />
+      <module name="redis-demo" target="1.8" />
+      <module name="spring-cloud" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/spring-cloud/cloud-provider-payment8001/cloud-provider-payment8001.iml" filepath="$PROJECT_DIR$/spring-cloud/cloud-provider-payment8001/cloud-provider-payment8001.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring-cloud/cloud-provider-payment9001/cloud-provider-payment9001.iml" filepath="$PROJECT_DIR$/spring-cloud/cloud-provider-payment9001/cloud-provider-payment9001.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring-cloud/cloud-sentinel-service8401/cloud-sentinel-service8401.iml" filepath="$PROJECT_DIR$/spring-cloud/cloud-sentinel-service8401/cloud-sentinel-service8401.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring-cloud/distribution-consumer/distribution-consumer.iml" filepath="$PROJECT_DIR$/spring-cloud/distribution-consumer/distribution-consumer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring-cloud/order-producers/order-producers.iml" filepath="$PROJECT_DIR$/spring-cloud/order-producers/order-producers.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring-cloud/rabbitmq-consumer/rabbitmq-consumer.iml" filepath="$PROJECT_DIR$/spring-cloud/rabbitmq-consumer/rabbitmq-consumer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring-cloud/rabbitmq-producers/rabbitmq-producers.iml" filepath="$PROJECT_DIR$/spring-cloud/rabbitmq-producers/rabbitmq-producers.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring-cloud/redis-demo/redis-demo.iml" filepath="$PROJECT_DIR$/spring-cloud/redis-demo/redis-demo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spring-cloud/spring-cloud.iml" filepath="$PROJECT_DIR$/spring-cloud/spring-cloud.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/spring-demo.iml" filepath="$PROJECT_DIR$/.idea/spring-demo.iml" />
+    </modules>
+  </component>
+</project>
