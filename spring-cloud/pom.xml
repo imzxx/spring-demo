@@ -17,6 +17,10 @@
         <module>cloud-provider-payment8001</module>
         <module>cloud-provider-payment9001</module>
         <module>cloud-sentinel-service8401</module>
+        <module>stream-rabbitmq-provider8801</module>
+        <module>stream-rabbitmq-provider8802</module>
+        <module>stream-rabbitmq-provider8803</module>
+        <module>pattern-demo</module>
     </modules>
 
     <!-- 统一管理jar包版本 -->

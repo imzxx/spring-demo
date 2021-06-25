@@ -1,0 +1,23 @@
+server:
+  port: 8801
+spring:
+  application:
+    name: cloud-stream-provider
+  rabbitmq:
+    host: 192.168.132.137
+    port: 5672
+    username: guest
+    password: guest
+  cloud:
+    stream:
+      binder: # 此处配置要绑定的rabbitmq的服务信息
+        local_rabbit: # 表示定义的名称，用于binding整合
+          type: rabbit # 消息组件的类型
+          environment: # 设置rabbitmq相关的环境配置
+            spring:
+
+      bindings: # 服务的整合处理
+        demo-output: # 这个名称是一个通道的名称
+          destination: studyExchange #表示要使用的Exchange名称
+          content-type: application/json # 设置消息类型，本地为json，文本则设置 text/plain
+          binder: local_rabbit #设置要绑定的消息服务的具体设置
