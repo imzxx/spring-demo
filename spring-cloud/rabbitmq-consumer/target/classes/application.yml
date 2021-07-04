@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: rabbitmq-producers
+  rabbitmq:
+    host: 192.168.10.239
+    port: 5672
+    virtual-host: /msg
+    username: root
+    password: root
+server:
+  port: 1001

@@ -17,6 +17,8 @@
         <module>cloud-provider-payment8001</module>
         <module>cloud-provider-payment9001</module>
         <module>cloud-sentinel-service8401</module>
+        <module>jvm-demo</module>
+        <module>pattern-demo</module>
     </modules>
 
     <!-- 统一管理jar包版本 -->
@@ -98,10 +100,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <fork>true</fork>
-                    <addResources>true</addResources>
-                </configuration>
+                <version>2.2.2.RELEASE</version>
             </plugin>
         </plugins>
     </build>

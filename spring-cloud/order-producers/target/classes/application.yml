@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: rabbitmq-producers
+  rabbitmq:
+    host: 192.168.10.239
+    port: 5672
+    virtual-host: /msg
+    username: root
+    password: root
+    listener:
+      simple:
+        acknowledge-mode: manual  #manual模式是开启手动ack
+    publisher-confirm-type: correlated #correlated值是发布消息成功到交换器后会触发回调方法
+    publisher-returns: true
+  datasource:
+    url: jdbc:mysql://192.168.10.239:3306/order_db
+    username: root
+    password: root
+    driver-class-name: com.mysql.jdbc.Driver
+server:
+  port: 1000
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.example.order.domain
+  configuration:
+    map-underscore-to-camel-case: true

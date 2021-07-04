@@ -1,0 +1,22 @@
+server:
+  port: 9001
+
+
+spring:
+  application:
+    name: cloud-provider-payment-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+      config:
+        server-addr: 127.0.0.1:8848
+        file-extension: yaml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+## ${spring.application.name}-${spring.profiles.active}.${file-extension}
+## cloud-provider-payment-service-dev.yml
